@@ -1,6 +1,7 @@
 {
-  "/home/tolik/synaptics-0078-project/builddir/synaptics-capture": "/usr/bin/synaptics-capture",
   "/home/tolik/synaptics-0078-project/builddir/synaptics-backend": "/usr/lib/synaptics-0078-backend/synaptics-backend",
   "/home/tolik/synaptics-0078-project/builddir/pam_synaptics.so": "/usr/lib/security/pam_synaptics.so",
+  "/home/tolik/synaptics-0078-project/systemd/synaptics-backend.service": "/etc/systemd/system/synaptics-backend.service",
+  "/home/tolik/synaptics-0078-project/dbus/net.reactivated.Fprint.conf": "/etc/dbus-1/system.d/net.reactivated.Fprint.conf",
   "/home/tolik/synaptics-0078-project/README.md": "/usr/share/doc/synaptics-0078/README.md"
 }

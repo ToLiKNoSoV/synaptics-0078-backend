@@ -1,6 +1,0 @@
-# List of files installed by Meson
-# Does not contain files installed by custom scripts.
-/usr/bin/synaptics-capture
-/usr/lib/synaptics-0078-backend/synaptics-backend
-/usr/lib/security/pam_synaptics.so
-/usr/share/doc/synaptics-0078/README.md

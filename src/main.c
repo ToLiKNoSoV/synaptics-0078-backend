@@ -35,6 +35,12 @@ typedef struct {
 static CurrentOperation *current_enroll = NULL;
 static CurrentOperation *current_verify = NULL;
 
+/* ========== Объявления функций ========== */
+static gpointer enroll_thread_func(gpointer data);
+static gpointer verify_thread_func(gpointer data);
+static void send_enroll_status_signal(const char *result, gboolean done);
+static void send_verify_status_signal(const char *result, gboolean done);
+
 /* ========== Вспомогательные функции ========== */
 
 static char *get_default_user(void) {
@@ -82,7 +88,7 @@ static void send_verify_status_signal(const char *result, gboolean done) {
 
 /* ========== Обработчики операций ========== */
 
-static void enroll_thread_func(gpointer data) {
+static gpointer enroll_thread_func(gpointer data) {
     CurrentOperation *op = (CurrentOperation *)data;
 
     g_print("Starting enroll for finger: %s\n", op->finger);
@@ -94,10 +100,9 @@ static void enroll_thread_func(gpointer data) {
         g_free(op->finger);
         g_free(op);
         current_enroll = NULL;
-        return;
+        return NULL;
     }
 
-    // Открываем устройство
     GError *error = NULL;
     if (!fp_device_open_sync(dev, NULL, &error)) {
         g_printerr("Failed to open device: %s\n", error->message);
@@ -107,19 +112,22 @@ static void enroll_thread_func(gpointer data) {
         g_free(op->finger);
         g_free(op);
         current_enroll = NULL;
-        return;
+        return NULL;
     }
 
     send_enroll_status_signal("enroll-ready", FALSE);
 
-    // Выполняем enroll
-    FpPrint *print = NULL;
-    if (!fp_device_enroll_sync(dev, NULL, &print, NULL, &error)) {
+    // ПРАВИЛЬНЫЙ ВЫЗОВ
+    GCancellable *cancellable = NULL;
+    FpPrint *template_print = NULL;  // для первого пальца передаём NULL
+    FpPrint *print = fp_device_enroll_sync(dev, cancellable, template_print,
+                                           NULL, NULL, &error);
+
+    if (!print) {
         g_printerr("Enroll failed: %s\n", error->message);
         send_enroll_status_signal("enroll-failed", TRUE);
         g_clear_error(&error);
     } else {
-        // Сохраняем шаблон
         const char *user = claimed_user ? claimed_user : default_user;
         if (storage_save_print(print, user, op->finger) == 0) {
             send_enroll_status_signal("enroll-completed", TRUE);
@@ -135,16 +143,17 @@ static void enroll_thread_func(gpointer data) {
     g_free(op->finger);
     g_free(op);
     current_enroll = NULL;
+
+    return NULL;
 }
 
-static void verify_thread_func(gpointer data) {
+static gpointer verify_thread_func(gpointer data) {
     CurrentOperation *op = (CurrentOperation *)data;
 
     g_print("Starting verify for finger: %s\n", op->finger);
 
     const char *user = claimed_user ? claimed_user : default_user;
 
-    // Загружаем сохранённый шаблон
     FpPrint *enrolled = storage_load_print(user, op->finger);
     if (!enrolled) {
         send_verify_status_signal("verify-no-match", TRUE);
@@ -152,7 +161,7 @@ static void verify_thread_func(gpointer data) {
         g_free(op->finger);
         g_free(op);
         current_verify = NULL;
-        return;
+        return NULL;
     }
 
     FpDevice *dev = device_get();
@@ -163,10 +172,9 @@ static void verify_thread_func(gpointer data) {
         g_free(op->finger);
         g_free(op);
         current_verify = NULL;
-        return;
+        return NULL;
     }
 
-    // Открываем устройство
     GError *error = NULL;
     if (!fp_device_open_sync(dev, NULL, &error)) {
         g_printerr("Failed to open device: %s\n", error->message);
@@ -177,20 +185,25 @@ static void verify_thread_func(gpointer data) {
         g_free(op->finger);
         g_free(op);
         current_verify = NULL;
-        return;
+        return NULL;
     }
 
-    // Выполняем verify
-    FpPrint *probe = NULL;
-    if (!fp_device_verify_sync(dev, enrolled, &probe, NULL, &error)) {
+    // ПРАВИЛЬНЫЙ ВЫЗОВ
+    GCancellable *cancellable = NULL;
+    gboolean match = FALSE;
+    gboolean result = fp_device_verify_sync(dev, enrolled, cancellable,
+                                            NULL, NULL, &match, &error);
+
+    if (!result) {
         g_printerr("Verify failed: %s\n", error->message);
         send_verify_status_signal("verify-no-match", TRUE);
         g_clear_error(&error);
-    } else {
+    } else if (match) {
         send_verify_status_signal("verify-match", TRUE);
+    } else {
+        send_verify_status_signal("verify-no-match", TRUE);
     }
 
-    g_clear_object(&probe);
     g_object_unref(enrolled);
     fp_device_close_sync(dev, NULL, NULL);
 
@@ -198,6 +211,8 @@ static void verify_thread_func(gpointer data) {
     g_free(op->finger);
     g_free(op);
     current_verify = NULL;
+
+    return NULL;
 }
 
 /* ========== D-Bus методы ========== */

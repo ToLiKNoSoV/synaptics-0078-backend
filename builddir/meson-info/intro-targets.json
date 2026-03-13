@@ -1,80 +1,5 @@
 [
   {
-    "name": "synaptics-capture",
-    "id": "synaptics-capture@exe",
-    "type": "executable",
-    "defined_in": "/home/tolik/synaptics-0078-project/meson.build",
-    "filename": [
-      "/home/tolik/synaptics-0078-project/builddir/synaptics-capture"
-    ],
-    "build_by_default": true,
-    "target_sources": [
-      {
-        "language": "c",
-        "machine": "host",
-        "compiler": [
-          "cc"
-        ],
-        "parameters": [
-          "-I/home/tolik/synaptics-0078-project/builddir/synaptics-capture.p",
-          "-I/home/tolik/synaptics-0078-project/builddir",
-          "-I/home/tolik/synaptics-0078-project",
-          "-I/usr/include/glib-2.0",
-          "-I/usr/lib/glib-2.0/include",
-          "-I/usr/include/sysprof-6",
-          "-I/usr/include/libfprint-2",
-          "-I/usr/include/gio-unix-2.0",
-          "-I/usr/include/libmount",
-          "-I/usr/include/blkid",
-          "-fdiagnostics-color=always",
-          "-D_FILE_OFFSET_BITS=64",
-          "-Wall",
-          "-Winvalid-pch",
-          "-std=c99",
-          "-O0",
-          "-g",
-          "-pthread"
-        ],
-        "sources": [
-          "/home/tolik/synaptics-0078-project/src/capture.c"
-        ],
-        "generated_sources": [],
-        "unity_sources": []
-      },
-      {
-        "linker": [
-          "cc"
-        ],
-        "parameters": [
-          "-Wl,--as-needed",
-          "-Wl,--no-undefined",
-          "-Wl,--start-group",
-          "-Wl,--start-group",
-          "/usr/lib/libglib-2.0.so",
-          "/usr/lib/libfprint-2.so",
-          "/usr/lib/libgio-2.0.so",
-          "/usr/lib/libgobject-2.0.so",
-          "-Wl,--end-group",
-          "-Wl,--end-group",
-          "-pthread"
-        ]
-      }
-    ],
-    "extra_files": [],
-    "subproject": null,
-    "dependencies": [
-      "glib-2.0",
-      "libfprint-2",
-      "threads"
-    ],
-    "depends": [],
-    "win_subsystem": "console",
-    "installed": true,
-    "install_filename": [
-      "/usr/bin/synaptics-capture"
-    ]
-  },
-  {
     "name": "synaptics-backend",
     "id": "synaptics-backend@exe",
     "type": "executable",
@@ -111,7 +36,9 @@
           "-pthread"
         ],
         "sources": [
-          "/home/tolik/synaptics-0078-project/src/main.c"
+          "/home/tolik/synaptics-0078-project/src/main.c",
+          "/home/tolik/synaptics-0078-project/src/device.c",
+          "/home/tolik/synaptics-0078-project/src/storage.c"
         ],
         "generated_sources": [],
         "unity_sources": []
@@ -129,10 +56,9 @@
           "/usr/lib/libgio-2.0.so",
           "/usr/lib/libgobject-2.0.so",
           "/usr/lib/libfprint-2.so",
-          "-pthread",
-          "-lm",
           "-Wl,--end-group",
-          "-Wl,--end-group"
+          "-Wl,--end-group",
+          "-pthread"
         ]
       }
     ],
@@ -143,8 +69,7 @@
       "gio-2.0",
       "gio-unix-2.0",
       "libfprint-2",
-      "threads",
-      "m"
+      "threads"
     ],
     "depends": [],
     "win_subsystem": "console",

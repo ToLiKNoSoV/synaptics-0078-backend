@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <dirent.h>
+#include <glib.h>
+#include <libfprint-2/fprint.h>
 
 static char* get_user_storage_dir(const char *username) {
     static char path[1024];
@@ -22,7 +24,6 @@ static void ensure_user_dir(const char *username) {
     char *dir = get_user_storage_dir(username);
     g_mkdir_with_parents(dir, 0755);
 
-    // Устанавливаем правильного владельца
     struct passwd *pw = getpwnam(username);
     if (pw) {
         chown(dir, pw->pw_uid, pw->pw_gid);
@@ -32,10 +33,8 @@ static void ensure_user_dir(const char *username) {
 int storage_save_print(FpPrint *print, const char *username, const char *finger) {
     if (!print || !username || !finger) return -1;
 
-    // Создаём директорию пользователя
     ensure_user_dir(username);
 
-    // Сериализуем шаблон
     guchar *data = NULL;
     gsize length = 0;
     GError *error = NULL;
@@ -46,7 +45,6 @@ int storage_save_print(FpPrint *print, const char *username, const char *finger)
         return -1;
     }
 
-    // Сохраняем в файл
     char *path = get_finger_path(username, finger);
     FILE *f = fopen(path, "wb");
     if (!f) {
@@ -59,7 +57,6 @@ int storage_save_print(FpPrint *print, const char *username, const char *finger)
     fclose(f);
     g_free(data);
 
-    // Устанавливаем правильного владельца
     struct passwd *pw = getpwnam(username);
     if (pw) {
         chown(path, pw->pw_uid, pw->pw_gid);
@@ -80,15 +77,16 @@ FpPrint* storage_load_print(const char *username, const char *finger) {
     }
 
     fseek(f, 0, SEEK_END);
-    long size = ftell(f);
+    gsize length = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    guchar *data = g_malloc(size);
-    fread(data, 1, size, f);
+    guchar *data = g_malloc(length);
+    fread(data, 1, length, f);
     fclose(f);
 
     GError *error = NULL;
-    FpPrint *print = fp_print_deserialize(NULL, data, size, &error);
+    FpPrint *print = fp_print_deserialize(data, length, &error);
+
     if (!print) {
         g_printerr("Failed to deserialize print: %s\n", error->message);
         g_error_free(error);

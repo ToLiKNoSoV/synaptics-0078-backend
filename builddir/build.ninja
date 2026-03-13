@@ -43,21 +43,23 @@ build PHONY: phony
 
 # Build rules for targets
 
-build synaptics-capture.p/src_capture.c.o: c_COMPILER ../src/capture.c
- DEPFILE = synaptics-capture.p/src_capture.c.o.d
- DEPFILE_UNQUOTED = synaptics-capture.p/src_capture.c.o.d
- ARGS = -Isynaptics-capture.p -I. -I.. -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -I/usr/include/libfprint-2 -I/usr/include/gio-unix-2.0 -I/usr/include/libmount -I/usr/include/blkid -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -std=c99 -O0 -g -pthread
-
-build synaptics-capture: c_LINKER synaptics-capture.p/src_capture.c.o | /usr/lib/libfprint-2.so /usr/lib/libgio-2.0.so /usr/lib/libglib-2.0.so /usr/lib/libgobject-2.0.so
- LINK_ARGS = -Wl,--as-needed -Wl,--no-undefined -Wl,--start-group /usr/lib/libglib-2.0.so /usr/lib/libfprint-2.so /usr/lib/libgio-2.0.so /usr/lib/libgobject-2.0.so -Wl,--end-group -pthread
-
 build synaptics-backend.p/src_main.c.o: c_COMPILER ../src/main.c
  DEPFILE = synaptics-backend.p/src_main.c.o.d
  DEPFILE_UNQUOTED = synaptics-backend.p/src_main.c.o.d
  ARGS = -Isynaptics-backend.p -I. -I.. -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/gio-unix-2.0 -I/usr/include/libfprint-2 -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -std=c99 -O0 -g -pthread
 
-build synaptics-backend: c_LINKER synaptics-backend.p/src_main.c.o | /usr/lib/libfprint-2.so /usr/lib/libgio-2.0.so /usr/lib/libglib-2.0.so /usr/lib/libgobject-2.0.so /usr/lib/libm.a /usr/lib/libm.so
- LINK_ARGS = -Wl,--as-needed -Wl,--no-undefined -Wl,--start-group /usr/lib/libglib-2.0.so /usr/lib/libgio-2.0.so /usr/lib/libgobject-2.0.so /usr/lib/libfprint-2.so -pthread -lm -Wl,--end-group
+build synaptics-backend.p/src_device.c.o: c_COMPILER ../src/device.c
+ DEPFILE = synaptics-backend.p/src_device.c.o.d
+ DEPFILE_UNQUOTED = synaptics-backend.p/src_device.c.o.d
+ ARGS = -Isynaptics-backend.p -I. -I.. -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/gio-unix-2.0 -I/usr/include/libfprint-2 -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -std=c99 -O0 -g -pthread
+
+build synaptics-backend.p/src_storage.c.o: c_COMPILER ../src/storage.c
+ DEPFILE = synaptics-backend.p/src_storage.c.o.d
+ DEPFILE_UNQUOTED = synaptics-backend.p/src_storage.c.o.d
+ ARGS = -Isynaptics-backend.p -I. -I.. -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/gio-unix-2.0 -I/usr/include/libfprint-2 -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -std=c99 -O0 -g -pthread
+
+build synaptics-backend: c_LINKER synaptics-backend.p/src_main.c.o synaptics-backend.p/src_device.c.o synaptics-backend.p/src_storage.c.o | /usr/lib/libfprint-2.so /usr/lib/libgio-2.0.so /usr/lib/libglib-2.0.so /usr/lib/libgobject-2.0.so
+ LINK_ARGS = -Wl,--as-needed -Wl,--no-undefined -Wl,--start-group /usr/lib/libglib-2.0.so /usr/lib/libgio-2.0.so /usr/lib/libgobject-2.0.so /usr/lib/libfprint-2.so -Wl,--end-group -pthread
 
 build pam_synaptics.so.p/src_pam_synaptics.c.o: c_COMPILER ../src/pam_synaptics.c
  DEPFILE = pam_synaptics.so.p/src_pam_synaptics.c.o.d
@@ -110,7 +112,7 @@ build meson-internal__uninstall: CUSTOM_COMMAND PHONY
  COMMAND = /usr/bin/meson --internal uninstall
  pool = console
 
-build all: phony synaptics-capture synaptics-backend pam_synaptics.so
+build all: phony synaptics-backend pam_synaptics.so
 
 build meson-test-prereq: phony 
 

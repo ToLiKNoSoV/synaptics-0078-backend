@@ -1,15 +1,21 @@
 [
   {
     "directory": "/home/tolik/synaptics-0078-project/builddir",
-    "command": "cc -Isynaptics-capture.p -I. -I.. -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -I/usr/include/libfprint-2 -I/usr/include/gio-unix-2.0 -I/usr/include/libmount -I/usr/include/blkid -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -std=c99 -O0 -g -pthread -MD -MQ synaptics-capture.p/src_capture.c.o -MF synaptics-capture.p/src_capture.c.o.d -o synaptics-capture.p/src_capture.c.o -c ../src/capture.c",
-    "file": "../src/capture.c",
-    "output": "synaptics-capture.p/src_capture.c.o"
-  },
-  {
-    "directory": "/home/tolik/synaptics-0078-project/builddir",
     "command": "cc -Isynaptics-backend.p -I. -I.. -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/gio-unix-2.0 -I/usr/include/libfprint-2 -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -std=c99 -O0 -g -pthread -MD -MQ synaptics-backend.p/src_main.c.o -MF synaptics-backend.p/src_main.c.o.d -o synaptics-backend.p/src_main.c.o -c ../src/main.c",
     "file": "../src/main.c",
     "output": "synaptics-backend.p/src_main.c.o"
+  },
+  {
+    "directory": "/home/tolik/synaptics-0078-project/builddir",
+    "command": "cc -Isynaptics-backend.p -I. -I.. -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/gio-unix-2.0 -I/usr/include/libfprint-2 -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -std=c99 -O0 -g -pthread -MD -MQ synaptics-backend.p/src_device.c.o -MF synaptics-backend.p/src_device.c.o.d -o synaptics-backend.p/src_device.c.o -c ../src/device.c",
+    "file": "../src/device.c",
+    "output": "synaptics-backend.p/src_device.c.o"
+  },
+  {
+    "directory": "/home/tolik/synaptics-0078-project/builddir",
+    "command": "cc -Isynaptics-backend.p -I. -I.. -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/gio-unix-2.0 -I/usr/include/libfprint-2 -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -std=c99 -O0 -g -pthread -MD -MQ synaptics-backend.p/src_storage.c.o -MF synaptics-backend.p/src_storage.c.o.d -o synaptics-backend.p/src_storage.c.o -c ../src/storage.c",
+    "file": "../src/storage.c",
+    "output": "synaptics-backend.p/src_storage.c.o"
   },
   {
     "directory": "/home/tolik/synaptics-0078-project/builddir",
