@@ -1,0 +1,23 @@
+The Meson build system
+Version: 1.10.1
+Source dir: /home/tolik/synaptics-0078-project
+Build dir: /home/tolik/synaptics-0078-project/builddir
+Build type: native build
+Project name: synaptics-0078
+Project version: 1.0.0
+C compiler for the host machine: cc (gcc 15.2.1 "cc (GCC) 15.2.1 20260209")
+C linker for the host machine: cc ld.bfd 2.46
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Found pkg-config: YES (/usr/bin/pkg-config) 2.5.1
+Run-time dependency glib-2.0 found: YES 2.86.4
+Run-time dependency gio-2.0 found: YES 2.86.4
+Run-time dependency gio-unix-2.0 found: YES 2.86.4
+Run-time dependency libfprint-2 found: YES 1.94.10
+Run-time dependency threads found: YES
+Run-time dependency libsystemd found: YES 259
+Run-time dependency pam found: YES 1.7.2
+Library m found: YES
+Build targets in project: 3
+
+Found ninja-1.13.2 at /usr/bin/ninja
