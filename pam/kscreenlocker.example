@@ -1,0 +1,11 @@
+# /etc/pam.d/sudo
+auth        sufficient    pam_exec.so quiet /usr/lib/synaptics-0078-backend/check-fingerprint.sh
+auth        required      pam_unix.so
+
+# /etc/pam.d/login
+auth        sufficient    pam_exec.so quiet /usr/lib/synaptics-0078-backend/check-fingerprint.sh
+auth        required      pam_unix.so
+
+# /etc/pam.d/kscreenlocker (уже есть)
+auth        sufficient    pam_exec.so quiet /usr/lib/synaptics-0078-backend/check-fingerprint.sh
+auth        required      pam_unix.so
