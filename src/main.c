@@ -117,10 +117,9 @@ static gpointer enroll_thread_func(gpointer data) {
 
     send_enroll_status_signal("enroll-ready", FALSE);
 
-    // ПРАВИЛЬНЫЙ ВЫЗОВ
+    // ПРАВИЛЬНЫЙ ПОРЯДОК: device, template, cancellable, callback, user_data, error
     GCancellable *cancellable = NULL;
-    FpPrint *template_print = NULL;  // для первого пальца передаём NULL
-    FpPrint *print = fp_device_enroll_sync(dev, cancellable, template_print,
+    FpPrint *print = fp_device_enroll_sync(dev, NULL, cancellable,
                                            NULL, NULL, &error);
 
     if (!print) {
@@ -188,18 +187,19 @@ static gpointer verify_thread_func(gpointer data) {
         return NULL;
     }
 
-    // ПРАВИЛЬНЫЙ ВЫЗОВ
+    // ПРАВИЛЬНЫЙ ПОРЯДОК: device, enrolled, cancellable, callback, user_data, match_print, error
     GCancellable *cancellable = NULL;
-    gboolean match = FALSE;
+    FpPrint *match_print = NULL;
     gboolean result = fp_device_verify_sync(dev, enrolled, cancellable,
-                                            NULL, NULL, &match, &error);
+                                            NULL, NULL, &match_print, &error);
 
     if (!result) {
         g_printerr("Verify failed: %s\n", error->message);
         send_verify_status_signal("verify-no-match", TRUE);
         g_clear_error(&error);
-    } else if (match) {
+    } else if (match_print) {
         send_verify_status_signal("verify-match", TRUE);
+        g_object_unref(match_print);
     } else {
         send_verify_status_signal("verify-no-match", TRUE);
     }
