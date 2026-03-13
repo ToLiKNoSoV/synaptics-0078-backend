@@ -179,19 +179,25 @@ static gpointer verify_thread_func(gpointer data) {
         return NULL;
     }
 
-    // Правильный вызов согласно документации libfprint
+    // Правильный вызов согласно прототипу из заголовочного файла
+    gboolean match_result = FALSE;
     FpPrint *match_print = NULL;
-    gboolean result = fp_device_verify_sync(dev, enrolled, NULL, NULL, NULL, &match_print, &error);
+
+    gboolean result = fp_device_verify_sync(dev, enrolled, NULL, NULL, NULL,
+                                            &match_result, &match_print, &error);
 
     if (!result) {
         g_printerr("Verify failed: %s\n", error->message);
         send_verify_status_signal("verify-no-match", TRUE);
         g_clear_error(&error);
-    } else if (match_print) {
+    } else if (match_result) {
         send_verify_status_signal("verify-match", TRUE);
-        g_object_unref(match_print);
     } else {
         send_verify_status_signal("verify-no-match", TRUE);
+    }
+
+    if (match_print) {
+        g_object_unref(match_print);
     }
 
     g_object_unref(enrolled);
