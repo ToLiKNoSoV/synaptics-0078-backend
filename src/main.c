@@ -35,12 +35,6 @@ typedef struct {
 static CurrentOperation *current_enroll = NULL;
 static CurrentOperation *current_verify = NULL;
 
-/* ========== Объявления функций ========== */
-static gpointer enroll_thread_func(gpointer data);
-static gpointer verify_thread_func(gpointer data);
-static void send_enroll_status_signal(const char *result, gboolean done);
-static void send_verify_status_signal(const char *result, gboolean done);
-
 /* ========== Вспомогательные функции ========== */
 
 static char *get_default_user(void) {
@@ -117,10 +111,8 @@ static gpointer enroll_thread_func(gpointer data) {
 
     send_enroll_status_signal("enroll-ready", FALSE);
 
-    // ПРАВИЛЬНЫЙ ПОРЯДОК: device, template, cancellable, callback, user_data, error
-    GCancellable *cancellable = NULL;
-    FpPrint *print = fp_device_enroll_sync(dev, NULL, cancellable,
-                                           NULL, NULL, &error);
+    // Правильный вызов согласно документации libfprint
+    FpPrint *print = fp_device_enroll_sync(dev, NULL, NULL, NULL, NULL, &error);
 
     if (!print) {
         g_printerr("Enroll failed: %s\n", error->message);
@@ -187,11 +179,9 @@ static gpointer verify_thread_func(gpointer data) {
         return NULL;
     }
 
-    // ПРАВИЛЬНЫЙ ПОРЯДОК: device, enrolled, cancellable, callback, user_data, match_print, error
-    GCancellable *cancellable = NULL;
+    // Правильный вызов согласно документации libfprint
     FpPrint *match_print = NULL;
-    gboolean result = fp_device_verify_sync(dev, enrolled, cancellable,
-                                            NULL, NULL, &match_print, &error);
+    gboolean result = fp_device_verify_sync(dev, enrolled, NULL, NULL, NULL, &match_print, &error);
 
     if (!result) {
         g_printerr("Verify failed: %s\n", error->message);
@@ -228,6 +218,10 @@ static void handle_method_call(GDBusConnection *connection,
 
     g_print("========================================\n");
     g_print("Method called: '%s'\n", method_name);
+    g_print("  interface: '%s'\n", interface_name);
+    g_print("  object_path: '%s'\n", object_path);
+    g_print("  sender: '%s'\n", sender);
+    g_print("  parameters type: %s\n", g_variant_get_type_string(parameters));
 
     if (g_strcmp0(interface_name, "net.reactivated.Fprint.Device") != 0) {
         g_dbus_method_invocation_return_error(invocation,
@@ -237,6 +231,8 @@ static void handle_method_call(GDBusConnection *connection,
     }
 
     if (g_strcmp0(method_name, "ListEnrolledFingers") == 0) {
+        g_print("ListEnrolledFingers called\n");
+
         const char *user = claimed_user ? claimed_user : default_user;
         GPtrArray *fingers = storage_list_fingers(user);
 
@@ -259,8 +255,14 @@ static void handle_method_call(GDBusConnection *connection,
         g_variant_get(parameters, "(&s)", &username);
 
         g_free(claimed_user);
-        claimed_user = g_strdup(username && strlen(username) > 0 ? username : default_user);
-        g_print("Claimed for user: %s\n", claimed_user);
+
+        if (username && strlen(username) > 0) {
+            claimed_user = g_strdup(username);
+            g_print("Claimed for user: %s\n", username);
+        } else {
+            claimed_user = g_strdup(default_user);
+            g_print("Claimed for user (default): %s\n", default_user);
+        }
 
         g_dbus_method_invocation_return_value(invocation, NULL);
     }
@@ -273,6 +275,7 @@ static void handle_method_call(GDBusConnection *connection,
     else if (g_strcmp0(method_name, "EnrollStart") == 0) {
         const char *finger;
         g_variant_get(parameters, "(&s)", &finger);
+        g_print("EnrollStart for finger: %s\n", finger);
 
         if (current_enroll) {
             g_dbus_method_invocation_return_error(invocation,
@@ -281,10 +284,18 @@ static void handle_method_call(GDBusConnection *connection,
             return;
         }
 
+        if (!finger || strlen(finger) == 0) {
+            g_dbus_method_invocation_return_error(invocation,
+                                                  G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                                                  "No finger specified");
+            return;
+        }
+
         current_enroll = g_new0(CurrentOperation, 1);
         current_enroll->sender = g_strdup(sender);
         current_enroll->finger = g_strdup(finger);
         current_enroll->invocation = g_object_ref(invocation);
+        current_enroll->active = TRUE;
 
         GThread *thread = g_thread_new("enroll-thread", enroll_thread_func, current_enroll);
         g_thread_unref(thread);
@@ -305,6 +316,14 @@ static void handle_method_call(GDBusConnection *connection,
     else if (g_strcmp0(method_name, "DeleteEnrolledFinger") == 0) {
         const char *finger;
         g_variant_get(parameters, "(&s)", &finger);
+        g_print("DeleteEnrolledFinger: %s\n", finger ? finger : "NULL");
+
+        if (!finger || strlen(finger) == 0) {
+            g_dbus_method_invocation_return_error(invocation,
+                                                  G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                                                  "No finger specified");
+            return;
+        }
 
         const char *user = claimed_user ? claimed_user : default_user;
         int result = storage_delete_finger(user, finger);
@@ -320,6 +339,7 @@ static void handle_method_call(GDBusConnection *connection,
     else if (g_strcmp0(method_name, "VerifyStart") == 0) {
         const char *finger;
         g_variant_get(parameters, "(&s)", &finger);
+        g_print("VerifyStart for finger: %s\n", finger ? finger : "NULL");
 
         if (current_verify) {
             g_dbus_method_invocation_return_error(invocation,
@@ -328,10 +348,18 @@ static void handle_method_call(GDBusConnection *connection,
             return;
         }
 
+        if (!finger || strlen(finger) == 0) {
+            g_dbus_method_invocation_return_error(invocation,
+                                                  G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                                                  "No finger specified");
+            return;
+        }
+
         current_verify = g_new0(CurrentOperation, 1);
         current_verify->sender = g_strdup(sender);
         current_verify->finger = g_strdup(finger);
         current_verify->invocation = g_object_ref(invocation);
+        current_verify->active = TRUE;
 
         GThread *thread = g_thread_new("verify-thread", verify_thread_func, current_verify);
         g_thread_unref(thread);
@@ -350,10 +378,12 @@ static void handle_method_call(GDBusConnection *connection,
         g_dbus_method_invocation_return_value(invocation, NULL);
     }
     else if (g_strcmp0(method_name, "GetCapabilities") == 0) {
+        g_print("GetCapabilities called\n");
         g_dbus_method_invocation_return_value(invocation,
                                               g_variant_new("(u)", 5));
     }
     else if (g_strcmp0(method_name, "GetScanType") == 0) {
+        g_print("GetScanType called\n");
         g_dbus_method_invocation_return_value(invocation,
                                               g_variant_new("(s)", "press"));
     }
@@ -364,184 +394,260 @@ static void handle_method_call(GDBusConnection *connection,
     }
                                }
 
-                               /* ========== Manager методы ========== */
+                               /* ========== Обработчики свойств ========== */
 
-                               static void handle_manager_method_call(GDBusConnection *connection,
-                                                                      const gchar *sender,
-                                                                      const gchar *object_path,
-                                                                      const gchar *interface_name,
-                                                                      const gchar *method_name,
-                                                                      GVariant *parameters,
-                                                                      GDBusMethodInvocation *invocation,
-                                                                      gpointer user_data) {
+                               static GVariant *handle_get_property(GDBusConnection *connection,
+                                                                    const gchar *sender,
+                                                                    const gchar *object_path,
+                                                                    const gchar *interface_name,
+                                                                    const gchar *property_name,
+                                                                    GError **error,
+                                                                    gpointer user_data) {
 
-                                   g_print("Manager method called: %s\n", method_name);
+                                   g_print("Get property: %s\n", property_name);
 
-                                   if (g_strcmp0(method_name, "GetDefaultDevice") == 0) {
-                                       g_dbus_method_invocation_return_value(invocation,
-                                                                             g_variant_new("(o)", OBJECT_PATH));
+                                   if (g_strcmp0(interface_name, "net.reactivated.Fprint.Device") != 0) {
+                                       g_set_error(error, G_DBUS_ERROR, G_DBUS_ERROR_UNKNOWN_INTERFACE,
+                                                   "Unknown interface");
+                                       return NULL;
                                    }
-                                   else if (g_strcmp0(method_name, "GetDevices") == 0) {
-                                       GVariantBuilder builder;
-                                       g_variant_builder_init(&builder, G_VARIANT_TYPE("ao"));
-                                       g_variant_builder_add(&builder, "o", OBJECT_PATH);
 
-                                       g_dbus_method_invocation_return_value(invocation,
-                                                                             g_variant_new("(ao)", &builder));
+                                   if (g_strcmp0(property_name, "scan-type") == 0) {
+                                       return g_variant_new_string("press");
                                    }
-                                   else {
-                                       g_dbus_method_invocation_return_error(invocation,
-                                                                             G_DBUS_ERROR, G_DBUS_ERROR_UNKNOWN_METHOD,
-                                                                             "Unknown method: %s", method_name);
+                                   else if (g_strcmp0(property_name, "num-enroll-stages") == 0) {
+                                       return g_variant_new_int32(5);
                                    }
-                                                                      }
 
-                                                                      /* ========== Инициализация D-Bus ========== */
+                                   g_set_error(error, G_DBUS_ERROR, G_DBUS_ERROR_UNKNOWN_PROPERTY,
+                                               "Unknown property: %s", property_name);
+                                   return NULL;
+                                                                    }
 
-                                                                      static void on_bus_acquired(GDBusConnection *connection,
-                                                                                                  const gchar *name,
-                                                                                                  gpointer user_data) {
+                                                                    static gboolean handle_set_property(GDBusConnection *connection,
+                                                                                                        const gchar *sender,
+                                                                                                        const gchar *object_path,
+                                                                                                        const gchar *interface_name,
+                                                                                                        const gchar *property_name,
+                                                                                                        GVariant *value,
+                                                                                                        GError **error,
+                                                                                                        gpointer user_data) {
 
-                                                                          g_print("Bus acquired: %s\n", name);
-                                                                          system_bus = connection;
+                                                                        g_set_error(error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                                                                                    "Properties are read-only");
+                                                                        return FALSE;
+                                                                                                        }
 
-                                                                          GDBusInterfaceVTable device_vtable = {
-                                                                              handle_method_call,
-                                                                              NULL,
-                                                                              NULL
-                                                                          };
+                                                                                                        /* ========== Manager методы ========== */
 
-                                                                          GDBusNodeInfo *device_info = g_dbus_node_info_new_for_xml(
-                                                                              "<node>"
-                                                                              "  <interface name='net.reactivated.Fprint.Device'>"
-                                                                              "    <method name='ListEnrolledFingers'>"
-                                                                              "      <arg type='as' name='fingers' direction='out'/>"
-                                                                              "    </method>"
-                                                                              "    <method name='Claim'>"
-                                                                              "      <arg type='s' name='username' direction='in'/>"
-                                                                              "    </method>"
-                                                                              "    <method name='Release'/>"
-                                                                              "    <method name='DeleteEnrolledFinger'>"
-                                                                              "      <arg type='s' name='finger' direction='in'/>"
-                                                                              "    </method>"
-                                                                              "    <method name='EnrollStart'>"
-                                                                              "      <arg type='s' name='finger' direction='in'/>"
-                                                                              "    </method>"
-                                                                              "    <method name='EnrollStop'/>"
-                                                                              "    <method name='VerifyStart'>"
-                                                                              "      <arg type='s' name='finger' direction='in'/>"
-                                                                              "    </method>"
-                                                                              "    <method name='VerifyStop'/>"
-                                                                              "    <method name='GetCapabilities'>"
-                                                                              "      <arg type='u' name='caps' direction='out'/>"
-                                                                              "    </method>"
-                                                                              "    <method name='GetScanType'>"
-                                                                              "      <arg type='s' name='type' direction='out'/>"
-                                                                              "    </method>"
-                                                                              "    <signal name='EnrollStatus'>"
-                                                                              "      <arg type='s' name='result'/>"
-                                                                              "      <arg type='b' name='done'/>"
-                                                                              "    </signal>"
-                                                                              "    <signal name='VerifyStatus'>"
-                                                                              "      <arg type='s' name='result'/>"
-                                                                              "      <arg type='b' name='done'/>"
-                                                                              "    </signal>"
-                                                                              "  </interface>"
-                                                                              "</node>", NULL);
+                                                                                                        static void handle_manager_method_call(GDBusConnection *connection,
+                                                                                                                                               const gchar *sender,
+                                                                                                                                               const gchar *object_path,
+                                                                                                                                               const gchar *interface_name,
+                                                                                                                                               const gchar *method_name,
+                                                                                                                                               GVariant *parameters,
+                                                                                                                                               GDBusMethodInvocation *invocation,
+                                                                                                                                               gpointer user_data) {
 
-                                                                          guint device_reg = g_dbus_connection_register_object(connection,
-                                                                                                                               OBJECT_PATH,
-                                                                                                                               device_info->interfaces[0],
-                                                                                                                               &device_vtable,
-                                                                                                                               NULL,
-                                                                                                                               NULL,
-                                                                                                                               NULL);
+                                                                                                            g_print("Manager method called: %s\n", method_name);
 
-                                                                          if (device_reg == 0) {
-                                                                              g_printerr("Failed to register device object\n");
-                                                                              return;
-                                                                          }
-                                                                          g_print("Device object registered\n");
+                                                                                                            if (g_strcmp0(method_name, "GetDefaultDevice") == 0) {
+                                                                                                                g_dbus_method_invocation_return_value(invocation,
+                                                                                                                                                      g_variant_new("(o)", OBJECT_PATH));
+                                                                                                            }
+                                                                                                            else if (g_strcmp0(method_name, "GetDevices") == 0) {
+                                                                                                                const char *username, *application;
+                                                                                                                g_variant_get(parameters, "(&s&s)", &username, &application);
 
-                                                                          GDBusInterfaceVTable manager_vtable = {
-                                                                              handle_manager_method_call,
-                                                                              NULL,
-                                                                              NULL
-                                                                          };
+                                                                                                                GVariantBuilder builder;
+                                                                                                                g_variant_builder_init(&builder, G_VARIANT_TYPE("ao"));
+                                                                                                                g_variant_builder_add(&builder, "o", OBJECT_PATH);
 
-                                                                          GDBusNodeInfo *manager_info = g_dbus_node_info_new_for_xml(
-                                                                              "<node>"
-                                                                              "  <interface name='net.reactivated.Fprint.Manager'>"
-                                                                              "    <method name='GetDefaultDevice'>"
-                                                                              "      <arg type='o' name='device' direction='out'/>"
-                                                                              "    </method>"
-                                                                              "    <method name='GetDevices'>"
-                                                                              "      <arg type='s' name='username' direction='in'/>"
-                                                                              "      <arg type='s' name='application' direction='in'/>"
-                                                                              "      <arg type='ao' name='devices' direction='out'/>"
-                                                                              "    </method>"
-                                                                              "  </interface>"
-                                                                              "</node>", NULL);
+                                                                                                                g_dbus_method_invocation_return_value(invocation,
+                                                                                                                                                      g_variant_new("(ao)", &builder));
+                                                                                                            }
+                                                                                                            else {
+                                                                                                                g_dbus_method_invocation_return_error(invocation,
+                                                                                                                                                      G_DBUS_ERROR, G_DBUS_ERROR_UNKNOWN_METHOD,
+                                                                                                                                                      "Unknown method: %s", method_name);
+                                                                                                            }
+                                                                                                                                               }
 
-                                                                          guint manager_reg = g_dbus_connection_register_object(connection,
-                                                                                                                                MANAGER_PATH,
-                                                                                                                                manager_info->interfaces[0],
-                                                                                                                                &manager_vtable,
-                                                                                                                                NULL,
-                                                                                                                                NULL,
-                                                                                                                                NULL);
+                                                                                                                                               static GVariant *handle_manager_get_property(GDBusConnection *connection,
+                                                                                                                                                                                            const gchar *sender,
+                                                                                                                                                                                            const gchar *object_path,
+                                                                                                                                                                                            const gchar *interface_name,
+                                                                                                                                                                                            const gchar *property_name,
+                                                                                                                                                                                            GError **error,
+                                                                                                                                                                                            gpointer user_data) {
+                                                                                                                                                   g_set_error(error, G_DBUS_ERROR, G_DBUS_ERROR_UNKNOWN_PROPERTY,
+                                                                                                                                                               "Manager has no properties");
+                                                                                                                                                   return NULL;
+                                                                                                                                                                                            }
 
-                                                                          if (manager_reg == 0) {
-                                                                              g_printerr("Failed to register manager object\n");
-                                                                              return;
-                                                                          }
-                                                                          g_print("Manager object registered\n");
-                                                                                                  }
+                                                                                                                                                                                            static gboolean handle_manager_set_property(GDBusConnection *connection,
+                                                                                                                                                                                                                                        const gchar *sender,
+                                                                                                                                                                                                                                        const gchar *object_path,
+                                                                                                                                                                                                                                        const gchar *interface_name,
+                                                                                                                                                                                                                                        const gchar *property_name,
+                                                                                                                                                                                                                                        GVariant *value,
+                                                                                                                                                                                                                                        GError **error,
+                                                                                                                                                                                                                                        gpointer user_data) {
+                                                                                                                                                                                                g_set_error(error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                                                                                                                                                                                                            "Manager has no writable properties");
+                                                                                                                                                                                                return FALSE;
+                                                                                                                                                                                                                                        }
 
-                                                                                                  static void on_name_acquired(GDBusConnection *connection,
-                                                                                                                               const gchar *name,
-                                                                                                                               gpointer user_data) {
-                                                                                                      g_print("Name acquired: %s\n", name);
-                                                                                                                               }
+                                                                                                                                                                                                                                        /* ========== Инициализация D-Bus ========== */
 
-                                                                                                                               static void on_name_lost(GDBusConnection *connection,
-                                                                                                                                                        const gchar *name,
-                                                                                                                                                        gpointer user_data) {
-                                                                                                                                   g_print("Name lost: %s\n", name);
-                                                                                                                                   g_main_loop_quit(loop);
-                                                                                                                                                        }
+                                                                                                                                                                                                                                        static void on_bus_acquired(GDBusConnection *connection,
+                                                                                                                                                                                                                                                                const gchar *name,
+                                                                                                                                                                                                                                                                gpointer user_data) {
 
-                                                                                                                                                        /* ========== main ========== */
+                                                                                                                                                                                                                                            g_print("Bus acquired: %s\n", name);
+                                                                                                                                                                                                                                            system_bus = connection;
 
-                                                                                                                                                        int main(int argc, char *argv[]) {
-                                                                                                                                                            default_user = get_default_user();
-                                                                                                                                                            g_print("Default user: %s\n", default_user);
+                                                                                                                                                                                                                                            GDBusInterfaceVTable device_vtable = {
+                                                                                                                                                                                                                                                handle_method_call,
+                                                                                                                                                                                                                                                handle_get_property,
+                                                                                                                                                                                                                                                handle_set_property
+                                                                                                                                                                                                                                            };
 
-                                                                                                                                                            // Инициализируем устройство
-                                                                                                                                                            if (device_init() != 0) {
-                                                                                                                                                                g_printerr("Failed to initialize device\n");
-                                                                                                                                                                return 1;
-                                                                                                                                                            }
+                                                                                                                                                                                                                                            GDBusNodeInfo *device_info = g_dbus_node_info_new_for_xml(
+                                                                                                                                                                                                                                                "<node>"
+                                                                                                                                                                                                                                                "  <interface name='net.reactivated.Fprint.Device'>"
+                                                                                                                                                                                                                                                "    <method name='ListEnrolledFingers'>"
+                                                                                                                                                                                                                                                "      <arg type='as' name='fingers' direction='out'/>"
+                                                                                                                                                                                                                                                "    </method>"
+                                                                                                                                                                                                                                                "    <method name='Claim'>"
+                                                                                                                                                                                                                                                "      <arg type='s' name='username' direction='in'/>"
+                                                                                                                                                                                                                                                "    </method>"
+                                                                                                                                                                                                                                                "    <method name='Release'/>"
+                                                                                                                                                                                                                                                "    <method name='DeleteEnrolledFinger'>"
+                                                                                                                                                                                                                                                "      <arg type='s' name='finger' direction='in'/>"
+                                                                                                                                                                                                                                                "    </method>"
+                                                                                                                                                                                                                                                "    <method name='EnrollStart'>"
+                                                                                                                                                                                                                                                "      <arg type='s' name='finger' direction='in'/>"
+                                                                                                                                                                                                                                                "    </method>"
+                                                                                                                                                                                                                                                "    <method name='EnrollStop'/>"
+                                                                                                                                                                                                                                                "    <method name='VerifyStart'>"
+                                                                                                                                                                                                                                                "      <arg type='s' name='finger' direction='in'/>"
+                                                                                                                                                                                                                                                "    </method>"
+                                                                                                                                                                                                                                                "    <method name='VerifyStop'/>"
+                                                                                                                                                                                                                                                "    <method name='GetCapabilities'>"
+                                                                                                                                                                                                                                                "      <arg type='u' name='caps' direction='out'/>"
+                                                                                                                                                                                                                                                "    </method>"
+                                                                                                                                                                                                                                                "    <method name='GetScanType'>"
+                                                                                                                                                                                                                                                "      <arg type='s' name='type' direction='out'/>"
+                                                                                                                                                                                                                                                "    </method>"
+                                                                                                                                                                                                                                                "    <signal name='EnrollStatus'>"
+                                                                                                                                                                                                                                                "      <arg type='s' name='result'/>"
+                                                                                                                                                                                                                                                "      <arg type='b' name='done'/>"
+                                                                                                                                                                                                                                                "    </signal>"
+                                                                                                                                                                                                                                                "    <signal name='VerifyStatus'>"
+                                                                                                                                                                                                                                                "      <arg type='s' name='result'/>"
+                                                                                                                                                                                                                                                "      <arg type='b' name='done'/>"
+                                                                                                                                                                                                                                                "    </signal>"
+                                                                                                                                                                                                                                                "    <property name='scan-type' type='s' access='read'/>"
+                                                                                                                                                                                                                                                "    <property name='num-enroll-stages' type='i' access='read'/>"
+                                                                                                                                                                                                                                                "  </interface>"
+                                                                                                                                                                                                                                                "</node>", NULL);
 
-                                                                                                                                                            loop = g_main_loop_new(NULL, FALSE);
+                                                                                                                                                                                                                                            guint device_reg = g_dbus_connection_register_object(connection,
+                                                                                                                                                                                                                                                                OBJECT_PATH,
+                                                                                                                                                                                                                                                                device_info->interfaces[0],
+                                                                                                                                                                                                                                                                &device_vtable,
+                                                                                                                                                                                                                                                                NULL,
+                                                                                                                                                                                                                                                                NULL,
+                                                                                                                                                                                                                                                                NULL);
 
-                                                                                                                                                            guint id = g_bus_own_name(G_BUS_TYPE_SYSTEM,
-                                                                                                                                                                                      SERVICE_NAME,
-                                                                                                                                                                                      G_BUS_NAME_OWNER_FLAGS_NONE,
-                                                                                                                                                                                      on_bus_acquired,
-                                                                                                                                                                                      on_name_acquired,
-                                                                                                                                                                                      on_name_lost,
-                                                                                                                                                                                      NULL,
-                                                                                                                                                                                      NULL);
+                                                                                                                                                                                                                                            if (device_reg == 0) {
+                                                                                                                                                                                                                                                g_printerr("Failed to register device object\n");
+                                                                                                                                                                                                                                                return;
+                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                            g_print("Device object registered\n");
 
-                                                                                                                                                            g_print("Starting main loop...\n");
-                                                                                                                                                            g_main_loop_run(loop);
+                                                                                                                                                                                                                                            GDBusInterfaceVTable manager_vtable = {
+                                                                                                                                                                                                                                                handle_manager_method_call,
+                                                                                                                                                                                                                                                handle_manager_get_property,
+                                                                                                                                                                                                                                                handle_manager_set_property
+                                                                                                                                                                                                                                            };
 
-                                                                                                                                                            g_bus_unown_name(id);
-                                                                                                                                                            g_main_loop_unref(loop);
-                                                                                                                                                            device_close();
-                                                                                                                                                            g_free(default_user);
-                                                                                                                                                            g_free(claimed_user);
+                                                                                                                                                                                                                                            GDBusNodeInfo *manager_info = g_dbus_node_info_new_for_xml(
+                                                                                                                                                                                                                                                "<node>"
+                                                                                                                                                                                                                                                "  <interface name='net.reactivated.Fprint.Manager'>"
+                                                                                                                                                                                                                                                "    <method name='GetDefaultDevice'>"
+                                                                                                                                                                                                                                                "      <arg type='o' name='device' direction='out'/>"
+                                                                                                                                                                                                                                                "    </method>"
+                                                                                                                                                                                                                                                "    <method name='GetDevices'>"
+                                                                                                                                                                                                                                                "      <arg type='s' name='username' direction='in'/>"
+                                                                                                                                                                                                                                                "      <arg type='s' name='application' direction='in'/>"
+                                                                                                                                                                                                                                                "      <arg type='ao' name='devices' direction='out'/>"
+                                                                                                                                                                                                                                                "    </method>"
+                                                                                                                                                                                                                                                "  </interface>"
+                                                                                                                                                                                                                                                "</node>", NULL);
 
-                                                                                                                                                            return 0;
-                                                                                                                                                        }
+                                                                                                                                                                                                                                            guint manager_reg = g_dbus_connection_register_object(connection,
+                                                                                                                                                                                                                                                                MANAGER_PATH,
+                                                                                                                                                                                                                                                                manager_info->interfaces[0],
+                                                                                                                                                                                                                                                                &manager_vtable,
+                                                                                                                                                                                                                                                                NULL,
+                                                                                                                                                                                                                                                                NULL,
+                                                                                                                                                                                                                                                                NULL);
+
+                                                                                                                                                                                                                                            if (manager_reg == 0) {
+                                                                                                                                                                                                                                                g_printerr("Failed to register manager object\n");
+                                                                                                                                                                                                                                                return;
+                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                            g_print("Manager object registered\n");
+
+                                                                                                                                                                                                                                            g_print("Objects registered successfully\n");
+                                                                                                                                                                                                                                                                }
+
+                                                                                                                                                                                                                                                                static void on_name_acquired(GDBusConnection *connection,
+                                                                                                                                                                                                                                                                const gchar *name,
+                                                                                                                                                                                                                                                                gpointer user_data) {
+                                                                                                                                                                                                                                                                g_print("Name acquired: %s\n", name);
+                                                                                                                                                                                                                                                                }
+
+                                                                                                                                                                                                                                                                static void on_name_lost(GDBusConnection *connection,
+                                                                                                                                                                                                                                                                const gchar *name,
+                                                                                                                                                                                                                                                                gpointer user_data) {
+                                                                                                                                                                                                                                                                g_print("Name lost: %s\n", name);
+                                                                                                                                                                                                                                                                g_main_loop_quit(loop);
+                                                                                                                                                                                                                                                                }
+
+                                                                                                                                                                                                                                                                /* ========== main ========== */
+
+                                                                                                                                                                                                                                                                int main(int argc, char *argv[]) {
+                                                                                                                                                                                                                                                                default_user = get_default_user();
+                                                                                                                                                                                                                                                                g_print("Default user: %s\n", default_user);
+
+                                                                                                                                                                                                                                                                // Инициализируем устройство
+                                                                                                                                                                                                                                                                if (device_init() != 0) {
+                                                                                                                                                                                                                                                                g_printerr("Failed to initialize device\n");
+                                                                                                                                                                                                                                                                return 1;
+                                                                                                                                                                                                                                                                }
+
+                                                                                                                                                                                                                                                                loop = g_main_loop_new(NULL, FALSE);
+
+                                                                                                                                                                                                                                                                guint id = g_bus_own_name(G_BUS_TYPE_SYSTEM,
+                                                                                                                                                                                                                                                                SERVICE_NAME,
+                                                                                                                                                                                                                                                                G_BUS_NAME_OWNER_FLAGS_NONE,
+                                                                                                                                                                                                                                                                on_bus_acquired,
+                                                                                                                                                                                                                                                                on_name_acquired,
+                                                                                                                                                                                                                                                                on_name_lost,
+                                                                                                                                                                                                                                                                NULL,
+                                                                                                                                                                                                                                                                NULL);
+
+                                                                                                                                                                                                                                                                g_print("Starting main loop...\n");
+                                                                                                                                                                                                                                                                g_main_loop_run(loop);
+
+                                                                                                                                                                                                                                                                g_bus_unown_name(id);
+                                                                                                                                                                                                                                                                g_main_loop_unref(loop);
+                                                                                                                                                                                                                                                                device_close();
+                                                                                                                                                                                                                                                                g_free(default_user);
+                                                                                                                                                                                                                                                                g_free(claimed_user);
+
+                                                                                                                                                                                                                                                                return 0;
+                                                                                                                                                                                                                                                                }
