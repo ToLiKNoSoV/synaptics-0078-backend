@@ -1,0 +1,8 @@
+#%PAM-1.0
+auth        sufficient    pam_synaptics.so debug timeout=30 max-tries=3
+auth        sufficient    pam_unix.so try_first_pass likeauth nullok
+auth        required      pam_deny.so
+
+account     required      pam_unix.so
+
+session     required      pam_unix.so

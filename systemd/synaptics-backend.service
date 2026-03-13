@@ -1,0 +1,12 @@
+[Unit]
+Description=Synaptics Fingerprint Driver
+After=dbus.service
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/synaptics-0078-backend/synaptics-backend
+User=root
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+#%PAM-1.0
+auth        include         sddm-fingerprint
+auth        include         system-login
+auth        required        pam_nologin.so
+auth        optional        pam_kwallet5.so
+auth        optional        pam_kwallet.so
+
+account     include         system-login
+
+password    include         system-login
+
+session     optional        pam_keyinit.so force revoke
+session     include         system-login
+session     optional        pam_kwallet5.so auto_start
+session     optional        pam_kwallet.so auto_start

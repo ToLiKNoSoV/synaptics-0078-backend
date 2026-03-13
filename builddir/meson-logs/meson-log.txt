@@ -1,0 +1,388 @@
+Build started at 2026-03-13T19:33:54.376087
+Main binary: /usr/bin/python
+Build Options: 
+Python system: Linux
+The Meson build system
+Version: 1.10.1
+Source dir: /home/tolik/synaptics-0078-project
+Build dir: /home/tolik/synaptics-0078-project/builddir
+Build type: native build
+Project name: synaptics-0078
+Project version: 1.0.0
+-----------
+Detecting compiler via: `cc --version` -> 0
+stdout:
+cc (GCC) 15.2.1 20260209
+Copyright (C) 2025 Free Software Foundation, Inc.
+Это свободно распространяемое программное обеспечение. Условия копирования
+приведены в исходных текстах.
+
+  Без гарантии каких-либо качеств, включая 
+коммерческую ценность и применимость для каких-либо целей.
+-----------
+Running command: -cpp -x c -E -dM -
+-----
+-----------
+Detecting linker via: `cc -Wl,--version` -> 0
+stdout:
+GNU ld (GNU Binutils) 2.46
+Copyright (C) 2026 Free Software Foundation, Inc.
+Эта программа является свободным программным обеспечением. Вы можете распространять
+её на условиях GNU General Public License версии 3 или (по вашему выбору)
+более поздней версии.
+Эта программа не имеет абсолютно никаких не гарантий.
+-----------
+stderr:
+collect2 версия 15.2.1 20260209
+/usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/cccDdMtb.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib --version -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
+-----------
+Sanity testing C compiler: cc
+Is cross compiler: False.
+Sanity check compiler command line: cc sanitycheckc.c -o sanitycheckc.exe -D_FILE_OFFSET_BITS=64
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command:  /home/tolik/synaptics-0078-project/builddir/meson-private/sanitycheckc.exe
+-----------
+Sanity check: `/home/tolik/synaptics-0078-project/builddir/meson-private/sanitycheckc.exe` -> 0
+C compiler for the host machine: cc (gcc 15.2.1 "cc (GCC) 15.2.1 20260209")
+C linker for the host machine: cc ld.bfd 2.46
+-----------
+Detecting archiver via: `gcc-ar --version` -> 0
+stdout:
+GNU ar (GNU Binutils) 2.46
+Copyright (C) 2026 Free Software Foundation, Inc.
+Эта программа является открытым программным обеспечением; вы можете
+распространять её согласно условиям GNU General Public License версии 3 или
+(по вашему выбору) более новой версии.
+Эта программа не имеет абсолютно никаких гарантий.
+-----------
+-----------
+Detecting compiler via: `cc --version` -> 0
+stdout:
+cc (GCC) 15.2.1 20260209
+Copyright (C) 2025 Free Software Foundation, Inc.
+Это свободно распространяемое программное обеспечение. Условия копирования
+приведены в исходных текстах.
+
+  Без гарантии каких-либо качеств, включая 
+коммерческую ценность и применимость для каких-либо целей.
+-----------
+Running command: -cpp -x c -E -dM -
+-----
+-----------
+Detecting linker via: `cc -Wl,--version` -> 0
+stdout:
+GNU ld (GNU Binutils) 2.46
+Copyright (C) 2026 Free Software Foundation, Inc.
+Эта программа является свободным программным обеспечением. Вы можете распространять
+её на условиях GNU General Public License версии 3 или (по вашему выбору)
+более поздней версии.
+Эта программа не имеет абсолютно никаких не гарантий.
+-----------
+stderr:
+collect2 версия 15.2.1 20260209
+/usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/cchBBrgO.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib --version -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
+-----------
+Sanity testing C compiler: cc
+Is cross compiler: False.
+Sanity check compiler command line: cc sanitycheckc.c -o sanitycheckc.exe -D_FILE_OFFSET_BITS=64
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command:  /home/tolik/synaptics-0078-project/builddir/meson-private/sanitycheckc.exe
+-----------
+Sanity check: `/home/tolik/synaptics-0078-project/builddir/meson-private/sanitycheckc.exe` -> 0
+C compiler for the build machine: cc (gcc 15.2.1 "cc (GCC) 15.2.1 20260209")
+C linker for the build machine: cc ld.bfd 2.46
+-----------
+Detecting archiver via: `gcc-ar --version` -> 0
+stdout:
+GNU ar (GNU Binutils) 2.46
+Copyright (C) 2026 Free Software Foundation, Inc.
+Эта программа является открытым программным обеспечением; вы можете
+распространять её согласно условиям GNU General Public License версии 3 или
+(по вашему выбору) более новой версии.
+Эта программа не имеет абсолютно никаких гарантий.
+-----------
+Build machine cpu family: x86_64
+Build machine cpu: x86_64
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Target machine cpu family: x86_64
+Target machine cpu: x86_64
+Pkg-config binary missing from cross or native file, or env var undefined.
+Trying a default Pkg-config fallback at pkg-config
+Found pkg-config: YES (/usr/bin/pkg-config) 2.5.1
+Determining dependency 'glib-2.0' with pkg-config executable '/usr/bin/pkg-config'
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --modversion glib-2.0` -> 0
+stdout:
+2.86.4
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --cflags glib-2.0` -> 0
+stdout:
+-I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -pthread
+-----------
+env[PKG_CONFIG_ALLOW_SYSTEM_LIBS]: 1
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs glib-2.0` -> 0
+stdout:
+-L/usr/lib -lglib-2.0
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs glib-2.0` -> 0
+stdout:
+-lglib-2.0
+-----------
+Running compile:
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpnj4tu52w
+Code:
+
+        #include<stddef.h>
+        #include<stdio.h>
+        int main(void) {
+            printf("%ld\n", (long)(sizeof(void *)));
+            return 0;
+        }
+-----------
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpnj4tu52w/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpnj4tu52w/output.exe -D_FILE_OFFSET_BITS=64 -O0` -> 0
+Program stdout:
+
+8
+
+Program stderr:
+
+
+Running compile:
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpw1_s8r_e
+Code:
+
+-----------
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpw1_s8r_e/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpw1_s8r_e/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 --print-search-dirs` -> 0
+stdout:
+install: /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/
+programs: =/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/bin/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/bin/
+libraries: =/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/lib/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/:/lib/x86_64-pc-linux-gnu/15.2.1/:/lib/../lib/:/usr/lib/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../:/lib/:/usr/lib/
+-----------
+Running compile:
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmp3n0gw87_
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmp3n0gw87_/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmp3n0gw87_/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libglib-2.0.so -Wl,--allow-shlib-undefined` -> 0
+Run-time dependency glib-2.0 found: YES 2.86.4
+Determining dependency 'gio-2.0' with pkg-config executable '/usr/bin/pkg-config'
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --modversion gio-2.0` -> 0
+stdout:
+2.86.4
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --cflags gio-2.0` -> 0
+stdout:
+-I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/sysprof-6 -pthread
+-----------
+env[PKG_CONFIG_ALLOW_SYSTEM_LIBS]: 1
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs gio-2.0` -> 0
+stdout:
+-L/usr/lib -lgio-2.0 -lgobject-2.0 -lglib-2.0
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs gio-2.0` -> 0
+stdout:
+-lgio-2.0 -lgobject-2.0 -lglib-2.0
+-----------
+Running compile:
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmplqsat1ok
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmplqsat1ok/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmplqsat1ok/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libgio-2.0.so -Wl,--allow-shlib-undefined` -> 0
+Running compile:
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmp84usquev
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmp84usquev/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmp84usquev/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libgobject-2.0.so -Wl,--allow-shlib-undefined` -> 0
+Run-time dependency gio-2.0 found: YES 2.86.4
+Determining dependency 'gio-unix-2.0' with pkg-config executable '/usr/bin/pkg-config'
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --modversion gio-unix-2.0` -> 0
+stdout:
+2.86.4
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --cflags gio-unix-2.0` -> 0
+stdout:
+-I/usr/include/gio-unix-2.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/sysprof-6 -pthread
+-----------
+env[PKG_CONFIG_ALLOW_SYSTEM_LIBS]: 1
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs gio-unix-2.0` -> 0
+stdout:
+-L/usr/lib -lgio-2.0 -lgobject-2.0 -lglib-2.0
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs gio-unix-2.0` -> 0
+stdout:
+-lgio-2.0 -lgobject-2.0 -lglib-2.0
+-----------
+Run-time dependency gio-unix-2.0 found: YES 2.86.4
+Determining dependency 'libfprint-2' with pkg-config executable '/usr/bin/pkg-config'
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --modversion libfprint-2` -> 0
+stdout:
+1.94.10
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --cflags libfprint-2` -> 0
+stdout:
+-I/usr/include/libfprint-2 -I/usr/include/gio-unix-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -pthread
+-----------
+env[PKG_CONFIG_ALLOW_SYSTEM_LIBS]: 1
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs libfprint-2` -> 0
+stdout:
+-L/usr/lib -lfprint-2 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs libfprint-2` -> 0
+stdout:
+-lfprint-2 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+-----------
+Running compile:
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpxpaqzgl9
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpxpaqzgl9/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpxpaqzgl9/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libfprint-2.so -Wl,--allow-shlib-undefined` -> 0
+Run-time dependency libfprint-2 found: YES 1.94.10
+Run-time dependency threads found: YES
+Determining dependency 'libsystemd' with pkg-config executable '/usr/bin/pkg-config'
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --modversion libsystemd` -> 0
+stdout:
+259
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --cflags libsystemd` -> 0
+env[PKG_CONFIG_ALLOW_SYSTEM_LIBS]: 1
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs libsystemd` -> 0
+stdout:
+-L/usr/lib -lsystemd
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs libsystemd` -> 0
+stdout:
+-lsystemd
+-----------
+Running compile:
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmprvg2ybns
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmprvg2ybns/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmprvg2ybns/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libsystemd.so -Wl,--allow-shlib-undefined` -> 0
+Run-time dependency libsystemd found: YES 259
+Determining dependency 'pam' with pkg-config executable '/usr/bin/pkg-config'
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --modversion pam` -> 0
+stdout:
+1.7.2
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --cflags pam` -> 0
+env[PKG_CONFIG_ALLOW_SYSTEM_LIBS]: 1
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs pam` -> 0
+stdout:
+-L/usr/lib -lpam
+-----------
+env[PKG_CONFIG_PATH]: 
+env[PKG_CONFIG]: /usr/bin/pkg-config
+-----------
+Called: `/usr/bin/pkg-config --libs pam` -> 0
+stdout:
+-lpam
+-----------
+Running compile:
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmp_mmr0ro_
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmp_mmr0ro_/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmp_mmr0ro_/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libpam.so -Wl,--allow-shlib-undefined` -> 0
+Run-time dependency pam found: YES 1.7.2
+Running compile:
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpuodb6che
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpuodb6che/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpuodb6che/output.exe -D_FILE_OFFSET_BITS=64 -O0 -lm -Wl,--allow-shlib-undefined` -> 0
+Library m found: YES
+Build targets in project: 3
+
+Found ninja-1.13.2 at /usr/bin/ninja
+Failed to guess install tag for /usr/share/doc/synaptics-0078/README.md
+Failed to guess install tag for /usr/share/doc/synaptics-0078/README.md

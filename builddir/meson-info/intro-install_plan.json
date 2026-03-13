@@ -1,0 +1,32 @@
+{
+  "targets": {
+    "/home/tolik/synaptics-0078-project/builddir/synaptics-capture": {
+      "destination": "/usr/bin/synaptics-capture",
+      "tag": "runtime",
+      "subproject": null,
+      "install_rpath": null,
+      "build_rpaths": []
+    },
+    "/home/tolik/synaptics-0078-project/builddir/synaptics-backend": {
+      "destination": "/usr/lib/synaptics-0078-backend/synaptics-backend",
+      "tag": "runtime",
+      "subproject": null,
+      "install_rpath": null,
+      "build_rpaths": []
+    },
+    "/home/tolik/synaptics-0078-project/builddir/pam_synaptics.so": {
+      "destination": "/usr/lib/security/pam_synaptics.so",
+      "tag": "runtime",
+      "subproject": null,
+      "install_rpath": null,
+      "build_rpaths": []
+    }
+  },
+  "data": {
+    "/home/tolik/synaptics-0078-project/README.md": {
+      "destination": "/usr/share/doc/synaptics-0078/README.md",
+      "tag": null,
+      "subproject": null
+    }
+  }
+}
