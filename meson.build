@@ -30,13 +30,13 @@ executable('synaptics-backend',
            install: true,
            install_dir: get_option('libexecdir') / 'synaptics-0078-backend')
 
-# Systemd service - используем systemd_systemunit_dir
+# Systemd service
 systemd = dependency('systemd', required: false)
 if systemd.found()
     systemd_unit_dir = systemd.get_variable(pkgconfig: 'systemdsystemunitdir')
 
     configure_file(
-        input: 'data/synaptics-backend.service.in',
+        input: 'synaptics-backend.service.in',
         output: 'synaptics-backend.service',
         configuration: {
             'LIBEXEC_DIR': get_option('prefix') / get_option('libexecdir')

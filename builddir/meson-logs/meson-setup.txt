@@ -15,7 +15,8 @@ Run-time dependency gio-2.0 found: YES 2.86.4
 Run-time dependency gio-unix-2.0 found: YES 2.86.4
 Run-time dependency libusb-1.0 found: YES 1.0.29
 Run-time dependency libfprint-2 found: YES 1.94.10
+Run-time dependency systemd found: YES 259
 
-meson.build:41:17: ERROR: Option systemdsystemunitdir does not exist.
+meson.build:38:4: ERROR: File data/synaptics-backend.service.in does not exist.
 
 A full log can be found at /home/tolik/synaptics-0078-project/builddir/meson-logs/meson-log.txt
