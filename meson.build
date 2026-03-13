@@ -30,16 +30,21 @@ executable('synaptics-backend',
            install: true,
            install_dir: get_option('libexecdir') / 'synaptics-0078-backend')
 
-# Systemd service
-configure_file(
-    input: 'data/synaptics-backend.service.in',
-    output: 'synaptics-backend.service',
-    configuration: {
-        'LIBEXEC_DIR': get_option('prefix') / get_option('libexecdir')
-    },
-    install: true,
-    install_dir: get_option('systemdsystemunitdir')
-)
+# Systemd service - используем systemd_systemunit_dir
+systemd = dependency('systemd', required: false)
+if systemd.found()
+    systemd_unit_dir = systemd.get_variable(pkgconfig: 'systemdsystemunitdir')
+
+    configure_file(
+        input: 'data/synaptics-backend.service.in',
+        output: 'synaptics-backend.service',
+        configuration: {
+            'LIBEXEC_DIR': get_option('prefix') / get_option('libexecdir')
+        },
+        install: true,
+        install_dir: systemd_unit_dir
+    )
+endif
 
 # Create state directory
 install_emptydir('/var/lib/fprint/synaptics_0078')
