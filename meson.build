@@ -1,50 +1,53 @@
-project('synaptics-0078-backend', 'c',
-        version: '1.0.0',
-        license: 'GPL2+',
-        default_options: [
-            'c_std=c11',
-            'warning_level=2'
-        ])
+project('synaptics-0078', 'c',
+    version: '1.0.0',
+    license: 'LGPL2.1+',
+    default_options: ['c_std=c99']
+)
 
-cc = meson.get_compiler('c')
+glib_dep = dependency('glib-2.0')
+gio_dep = dependency('gio-2.0')
+gio_unix_dep = dependency('gio-unix-2.0')
+libfprint_dep = dependency('libfprint-2')
+thread_dep = dependency('threads')
+systemd_dep = dependency('libsystemd')
+pam_dep = dependency('pam', required: true)
 
-# Dependencies
-glib_dep = dependency('glib-2.0', version: '>=2.44')
-gio_dep = dependency('gio-2.0', version: '>=2.44')
-gio_unix_dep = dependency('gio-unix-2.0', version: '>=2.44')
-libusb_dep = dependency('libusb-1.0', version: '>=1.0.20')
-libfprint_dep = dependency('libfprint-2', version: '>=1.94.0')
-
-deps = [
-    glib_dep,
-    gio_dep,
-    gio_unix_dep,
-    libusb_dep,
-    libfprint_dep
-]
-
-# Executable
+# Основной бэкенд
 executable('synaptics-backend',
-           'src/main.c',
-           dependencies: deps,
-           install: true,
-           install_dir: get_option('libexecdir') / 'synaptics-0078-backend')
+    [
+        'src/main.c',
+        'src/device.c',
+        'src/storage.c'
+    ],
+    dependencies: [glib_dep, gio_dep, gio_unix_dep, libfprint_dep, thread_dep],
+    install: true,
+    install_dir: '/usr/lib/synaptics-0078-backend'
+)
 
-# Systemd service
-systemd = dependency('systemd', required: false)
-if systemd.found()
-    systemd_unit_dir = systemd.get_variable(pkgconfig: 'systemdsystemunitdir')
+# PAM модуль (остаётся без изменений)
+shared_library('pam_synaptics',
+    'src/pam_synaptics.c',
+    dependencies: [systemd_dep, pam_dep],
+    name_prefix: '',
+    install: true,
+    install_dir: '/usr/lib/security'
+)
 
-    configure_file(
-        input: 'synaptics-backend.service.in',
-        output: 'synaptics-backend.service',
-        configuration: {
-            'LIBEXEC_DIR': get_option('prefix') / get_option('libexecdir')
-        },
-        install: true,
-        install_dir: systemd_unit_dir
-    )
-endif
+# Вспомогательные утилиты (больше не нужны, но оставим для совместимости)
+# capture.c и nbis-helper.c можно удалить из проекта
 
-# Create state directory
-install_emptydir('/var/lib/fprint/synaptics_0078')
+# Конфигурационные файлы
+install_data('systemd/synaptics-backend.service',
+    install_dir: '/etc/systemd/system'
+)
+
+install_data('dbus/net.reactivated.Fprint.conf',
+    install_dir: '/etc/dbus-1/system.d'
+)
+
+install_data('README.md',
+    install_dir: '/usr/share/doc/synaptics-0078'
+)
+
+# Пост-установочный скрипт (обновлённый)
+meson.add_install_script('scripts/post-install.sh')
