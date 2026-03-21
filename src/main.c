@@ -30,10 +30,11 @@ typedef struct {
     char *finger;
     GDBusMethodInvocation *invocation;
     gboolean active;
+    FpDevice *dev;
+    GCancellable *cancellable;
 } CurrentOperation;
 
 static CurrentOperation *current_enroll = NULL;
-static CurrentOperation *current_verify = NULL;
 
 /* ========== Вспомогательные функции ========== */
 
@@ -66,149 +67,108 @@ static void send_enroll_status_signal(const char *result, gboolean done) {
     g_print("📢 EnrollStatus signal sent: %s, done=%d\n", result, done);
 }
 
-static void send_verify_status_signal(const char *result, gboolean done) {
-    if (!system_bus) return;
+/* ========== Колбэки для асинхронного enroll ========== */
 
-    GVariant *value = g_variant_new("(sb)", result, done);
-    g_dbus_connection_emit_signal(system_bus,
-                                  NULL,
-                                  OBJECT_PATH,
-                                  "net.reactivated.Fprint.Device",
-                                  "VerifyStatus",
-                                  value,
-                                  NULL);
-    g_print("📢 VerifyStatus signal sent: %s, done=%d\n", result, done);
+static void enroll_progress_cb(FpDevice *dev, int status, FpPrint *print, void *user_data, GError *error) {
+    (void)dev;
+    (void)print;
+    (void)user_data;
+    (void)error;
+    g_print("📢 Enroll progress, status=%d\n", status);
 }
 
-/* ========== Обработчики операций ========== */
-
-static gpointer enroll_thread_func(gpointer data) {
-    CurrentOperation *op = (CurrentOperation *)data;
-
-    g_print("Starting enroll for finger: %s\n", op->finger);
-
-    FpDevice *dev = device_get();
-    if (!dev) {
-        send_enroll_status_signal("enroll-failed", TRUE);
-        g_free(op->sender);
-        g_free(op->finger);
-        g_free(op);
-        current_enroll = NULL;
-        return NULL;
-    }
-
+static void enroll_cb(GObject *source_object, GAsyncResult *res, void *user_data) {
+    FpDevice *dev = (FpDevice *)source_object;
+    CurrentOperation *op = (CurrentOperation *)user_data;
     GError *error = NULL;
-    if (!fp_device_open_sync(dev, NULL, &error)) {
-        g_printerr("Failed to open device: %s\n", error->message);
-        send_enroll_status_signal("enroll-failed", TRUE);
-        g_clear_error(&error);
-        g_free(op->sender);
-        g_free(op->finger);
-        g_free(op);
-        current_enroll = NULL;
-        return NULL;
-    }
 
-    send_enroll_status_signal("enroll-ready", FALSE);
+    g_print("DEBUG: enroll_cb called\n");
 
-    // Правильный вызов согласно документации libfprint
-    FpPrint *print = fp_device_enroll_sync(dev, NULL, NULL, NULL, NULL, &error);
+    FpPrint *print = fp_device_enroll_finish(dev, res, &error);
 
     if (!print) {
-        g_printerr("Enroll failed: %s\n", error->message);
+        if (error) {
+            g_printerr("ERROR: Enroll failed: %s\n", error->message);
+            g_clear_error(&error);
+        } else {
+            g_printerr("ERROR: Enroll failed (unknown reason)\n");
+        }
         send_enroll_status_signal("enroll-failed", TRUE);
-        g_clear_error(&error);
+
+        g_free(op->sender);
+        g_free(op->finger);
+        if (op->cancellable) g_object_unref(op->cancellable);
+        g_free(op);
+        current_enroll = NULL;
     } else {
+        g_print("DEBUG: Enroll succeeded\n");
+
         const char *user = claimed_user ? claimed_user : default_user;
         if (storage_save_print(print, user, op->finger) == 0) {
             send_enroll_status_signal("enroll-completed", TRUE);
         } else {
             send_enroll_status_signal("enroll-failed", TRUE);
         }
+
         g_object_unref(print);
+        g_free(op->sender);
+        g_free(op->finger);
+        if (op->cancellable) g_object_unref(op->cancellable);
+        g_free(op);
+        current_enroll = NULL;
     }
 
-    fp_device_close_sync(dev, NULL, NULL);
-
-    g_free(op->sender);
-    g_free(op->finger);
-    g_free(op);
-    current_enroll = NULL;
-
-    return NULL;
+    // НЕ закрываем устройство
+    g_print("DEBUG: enroll_cb completed\n");
 }
 
-static gpointer verify_thread_func(gpointer data) {
-    CurrentOperation *op = (CurrentOperation *)data;
-
-    g_print("Starting verify for finger: %s\n", op->finger);
-
-    const char *user = claimed_user ? claimed_user : default_user;
-
-    FpPrint *enrolled = storage_load_print(user, op->finger);
-    if (!enrolled) {
-        send_verify_status_signal("verify-no-match", TRUE);
-        g_free(op->sender);
-        g_free(op->finger);
-        g_free(op);
-        current_verify = NULL;
-        return NULL;
-    }
-
-    FpDevice *dev = device_get();
-    if (!dev) {
-        g_object_unref(enrolled);
-        send_verify_status_signal("verify-failed", TRUE);
-        g_free(op->sender);
-        g_free(op->finger);
-        g_free(op);
-        current_verify = NULL;
-        return NULL;
-    }
-
+static void open_cb(GObject *source_object, GAsyncResult *res, void *user_data) {
+    FpDevice *dev = (FpDevice *)source_object;
+    CurrentOperation *op = (CurrentOperation *)user_data;
     GError *error = NULL;
-    if (!fp_device_open_sync(dev, NULL, &error)) {
-        g_printerr("Failed to open device: %s\n", error->message);
-        g_object_unref(enrolled);
-        send_verify_status_signal("verify-failed", TRUE);
+
+    g_print("DEBUG: open_cb called\n");
+
+    if (!fp_device_open_finish(dev, res, &error)) {
+        g_printerr("ERROR: Failed to open device: %s\n", error->message);
+        send_enroll_status_signal("enroll-failed", TRUE);
         g_clear_error(&error);
+
         g_free(op->sender);
         g_free(op->finger);
+        if (op->cancellable) g_object_unref(op->cancellable);
         g_free(op);
-        current_verify = NULL;
-        return NULL;
+        current_enroll = NULL;
+        return;
     }
 
-    // Правильный вызов согласно прототипу из заголовочного файла
-    gboolean match_result = FALSE;
-    FpPrint *match_print = NULL;
+    g_print("DEBUG: Device opened successfully\n");
+    device_opened = TRUE;
+    send_enroll_status_signal("enroll-ready", FALSE);
 
-    gboolean result = fp_device_verify_sync(dev, enrolled, NULL, NULL, NULL,
-                                            &match_result, &match_print, &error);
-
-    if (!result) {
-        g_printerr("Verify failed: %s\n", error->message);
-        send_verify_status_signal("verify-no-match", TRUE);
-        g_clear_error(&error);
-    } else if (match_result) {
-        send_verify_status_signal("verify-match", TRUE);
-    } else {
-        send_verify_status_signal("verify-no-match", TRUE);
+    FpPrint *template = fp_print_new(dev);
+    if (!template) {
+        g_printerr("ERROR: Failed to create print template\n");
+        send_enroll_status_signal("enroll-failed", TRUE);
+        g_free(op->sender);
+        g_free(op->finger);
+        if (op->cancellable) g_object_unref(op->cancellable);
+        g_free(op);
+        current_enroll = NULL;
+        return;
     }
 
-    if (match_print) {
-        g_object_unref(match_print);
-    }
+    g_print("DEBUG: Starting enroll with template...\n");
+    fp_device_enroll(dev,
+                     template,
+                     op->cancellable,
+                     enroll_progress_cb,
+                     op,
+                     NULL,
+                     enroll_cb,
+                     op);
 
-    g_object_unref(enrolled);
-    fp_device_close_sync(dev, NULL, NULL);
-
-    g_free(op->sender);
-    g_free(op->finger);
-    g_free(op);
-    current_verify = NULL;
-
-    return NULL;
+    g_object_unref(template);
 }
 
 /* ========== D-Bus методы ========== */
@@ -236,10 +196,14 @@ static void handle_method_call(GDBusConnection *connection,
         return;
     }
 
+    // ========== ListEnrolledFingers ==========
     if (g_strcmp0(method_name, "ListEnrolledFingers") == 0) {
         g_print("ListEnrolledFingers called\n");
 
-        const char *user = claimed_user ? claimed_user : default_user;
+        const char *username;
+        g_variant_get(parameters, "(&s)", &username);
+        const char *user = (username && strlen(username) > 0) ? username : default_user;
+
         GPtrArray *fingers = storage_list_fingers(user);
 
         GVariantBuilder builder;
@@ -256,6 +220,7 @@ static void handle_method_call(GDBusConnection *connection,
         g_dbus_method_invocation_return_value(invocation,
                                               g_variant_new("(as)", &builder));
     }
+    // ========== Claim ==========
     else if (g_strcmp0(method_name, "Claim") == 0) {
         const char *username;
         g_variant_get(parameters, "(&s)", &username);
@@ -272,53 +237,14 @@ static void handle_method_call(GDBusConnection *connection,
 
         g_dbus_method_invocation_return_value(invocation, NULL);
     }
+    // ========== Release ==========
     else if (g_strcmp0(method_name, "Release") == 0) {
         g_print("Release called\n");
         g_free(claimed_user);
         claimed_user = NULL;
         g_dbus_method_invocation_return_value(invocation, NULL);
     }
-    else if (g_strcmp0(method_name, "EnrollStart") == 0) {
-        const char *finger;
-        g_variant_get(parameters, "(&s)", &finger);
-        g_print("EnrollStart for finger: %s\n", finger);
-
-        if (current_enroll) {
-            g_dbus_method_invocation_return_error(invocation,
-                                                  G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
-                                                  "Enroll already in progress");
-            return;
-        }
-
-        if (!finger || strlen(finger) == 0) {
-            g_dbus_method_invocation_return_error(invocation,
-                                                  G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
-                                                  "No finger specified");
-            return;
-        }
-
-        current_enroll = g_new0(CurrentOperation, 1);
-        current_enroll->sender = g_strdup(sender);
-        current_enroll->finger = g_strdup(finger);
-        current_enroll->invocation = g_object_ref(invocation);
-        current_enroll->active = TRUE;
-
-        GThread *thread = g_thread_new("enroll-thread", enroll_thread_func, current_enroll);
-        g_thread_unref(thread);
-
-        g_dbus_method_invocation_return_value(invocation, NULL);
-    }
-    else if (g_strcmp0(method_name, "EnrollStop") == 0) {
-        g_print("EnrollStop called\n");
-        if (current_enroll) {
-            current_enroll->active = FALSE;
-            g_free(current_enroll->sender);
-            g_free(current_enroll->finger);
-            g_free(current_enroll);
-            current_enroll = NULL;
-        }
-        g_dbus_method_invocation_return_value(invocation, NULL);
-    }
+    // ========== DeleteEnrolledFinger ==========
     else if (g_strcmp0(method_name, "DeleteEnrolledFinger") == 0) {
         const char *finger;
         g_variant_get(parameters, "(&s)", &finger);
@@ -342,15 +268,23 @@ static void handle_method_call(GDBusConnection *connection,
                                                   "Failed to delete fingerprint");
         }
     }
-    else if (g_strcmp0(method_name, "VerifyStart") == 0) {
+    // ========== DeleteEnrolledFingers ==========
+    else if (g_strcmp0(method_name, "DeleteEnrolledFingers") == 0) {
+        g_print("DeleteEnrolledFingers called — not implemented\n");
+        g_dbus_method_invocation_return_error(invocation,
+                                              G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                                              "DeleteEnrolledFingers not implemented");
+    }
+    // ========== EnrollStart ==========
+    else if (g_strcmp0(method_name, "EnrollStart") == 0) {
         const char *finger;
         g_variant_get(parameters, "(&s)", &finger);
-        g_print("VerifyStart for finger: %s\n", finger ? finger : "NULL");
+        g_print("EnrollStart for finger: %s\n", finger);
 
-        if (current_verify) {
+        if (current_enroll) {
             g_dbus_method_invocation_return_error(invocation,
                                                   G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
-                                                  "Verify already in progress");
+                                                  "Enroll already in progress");
             return;
         }
 
@@ -361,37 +295,81 @@ static void handle_method_call(GDBusConnection *connection,
             return;
         }
 
-        current_verify = g_new0(CurrentOperation, 1);
-        current_verify->sender = g_strdup(sender);
-        current_verify->finger = g_strdup(finger);
-        current_verify->invocation = g_object_ref(invocation);
-        current_verify->active = TRUE;
+        if (!claimed_user) {
+            g_dbus_method_invocation_return_error(invocation,
+                                                  G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                                                  "No user claimed");
+            return;
+        }
 
-        GThread *thread = g_thread_new("verify-thread", verify_thread_func, current_verify);
-        g_thread_unref(thread);
+        FpPrint *existing = storage_load_print(claimed_user, finger);
+        if (existing) {
+            g_object_unref(existing);
+            g_dbus_method_invocation_return_error(invocation,
+                                                  G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                                                  "Finger already enrolled");
+            return;
+        }
+
+        FpDevice *dev = device_get();
+        if (!dev) {
+            g_dbus_method_invocation_return_error(invocation,
+                                                  G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                                                  "Failed to get device");
+            return;
+        }
+
+        current_enroll = g_new0(CurrentOperation, 1);
+        current_enroll->sender = g_strdup(sender);
+        current_enroll->finger = g_strdup(finger);
+        current_enroll->invocation = g_object_ref(invocation);
+        current_enroll->active = TRUE;
+        current_enroll->dev = dev;
+        current_enroll->cancellable = g_cancellable_new();
+
+        if (!device_opened) {
+            g_print("DEBUG: Opening device asynchronously...\n");
+            fp_device_open(dev, current_enroll->cancellable, (GAsyncReadyCallback)open_cb, current_enroll);
+        } else {
+            g_print("DEBUG: Device already open, starting enroll directly...\n");
+            FpPrint *template = fp_print_new(dev);
+            if (!template) {
+                g_dbus_method_invocation_return_error(invocation,
+                                                      G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                                                      "Failed to create print template");
+                g_free(current_enroll->sender);
+                g_free(current_enroll->finger);
+                g_free(current_enroll);
+                current_enroll = NULL;
+                return;
+            }
+            send_enroll_status_signal("enroll-ready", FALSE);
+            fp_device_enroll(dev,
+                             template,
+                             current_enroll->cancellable,
+                             enroll_progress_cb,
+                             current_enroll,
+                             NULL,
+                             enroll_cb,
+                             current_enroll);
+            g_object_unref(template);
+        }
 
         g_dbus_method_invocation_return_value(invocation, NULL);
     }
-    else if (g_strcmp0(method_name, "VerifyStop") == 0) {
-        g_print("VerifyStop called\n");
-        if (current_verify) {
-            current_verify->active = FALSE;
-            g_free(current_verify->sender);
-            g_free(current_verify->finger);
-            g_free(current_verify);
-            current_verify = NULL;
+    // ========== EnrollStop ==========
+    else if (g_strcmp0(method_name, "EnrollStop") == 0) {
+        g_print("EnrollStop called\n");
+        if (current_enroll && current_enroll->cancellable) {
+            g_cancellable_cancel(current_enroll->cancellable);
         }
         g_dbus_method_invocation_return_value(invocation, NULL);
     }
+    // ========== GetCapabilities ==========
     else if (g_strcmp0(method_name, "GetCapabilities") == 0) {
         g_print("GetCapabilities called\n");
         g_dbus_method_invocation_return_value(invocation,
                                               g_variant_new("(u)", 5));
-    }
-    else if (g_strcmp0(method_name, "GetScanType") == 0) {
-        g_print("GetScanType called\n");
-        g_dbus_method_invocation_return_value(invocation,
-                                              g_variant_new("(s)", "press"));
     }
     else {
         g_dbus_method_invocation_return_error(invocation,
@@ -462,9 +440,6 @@ static void handle_method_call(GDBusConnection *connection,
                                                                                                                                                       g_variant_new("(o)", OBJECT_PATH));
                                                                                                             }
                                                                                                             else if (g_strcmp0(method_name, "GetDevices") == 0) {
-                                                                                                                const char *username, *application;
-                                                                                                                g_variant_get(parameters, "(&s&s)", &username, &application);
-
                                                                                                                 GVariantBuilder builder;
                                                                                                                 g_variant_builder_init(&builder, G_VARIANT_TYPE("ao"));
                                                                                                                 g_variant_builder_add(&builder, "o", OBJECT_PATH);
@@ -523,6 +498,7 @@ static void handle_method_call(GDBusConnection *connection,
                                                                                                                                                                                                                                                 "<node>"
                                                                                                                                                                                                                                                 "  <interface name='net.reactivated.Fprint.Device'>"
                                                                                                                                                                                                                                                 "    <method name='ListEnrolledFingers'>"
+                                                                                                                                                                                                                                                "      <arg type='s' name='username' direction='in'/>"
                                                                                                                                                                                                                                                 "      <arg type='as' name='fingers' direction='out'/>"
                                                                                                                                                                                                                                                 "    </method>"
                                                                                                                                                                                                                                                 "    <method name='Claim'>"
@@ -532,25 +508,15 @@ static void handle_method_call(GDBusConnection *connection,
                                                                                                                                                                                                                                                 "    <method name='DeleteEnrolledFinger'>"
                                                                                                                                                                                                                                                 "      <arg type='s' name='finger' direction='in'/>"
                                                                                                                                                                                                                                                 "    </method>"
+                                                                                                                                                                                                                                                "    <method name='DeleteEnrolledFingers'/>"
                                                                                                                                                                                                                                                 "    <method name='EnrollStart'>"
                                                                                                                                                                                                                                                 "      <arg type='s' name='finger' direction='in'/>"
                                                                                                                                                                                                                                                 "    </method>"
                                                                                                                                                                                                                                                 "    <method name='EnrollStop'/>"
-                                                                                                                                                                                                                                                "    <method name='VerifyStart'>"
-                                                                                                                                                                                                                                                "      <arg type='s' name='finger' direction='in'/>"
-                                                                                                                                                                                                                                                "    </method>"
-                                                                                                                                                                                                                                                "    <method name='VerifyStop'/>"
                                                                                                                                                                                                                                                 "    <method name='GetCapabilities'>"
                                                                                                                                                                                                                                                 "      <arg type='u' name='caps' direction='out'/>"
                                                                                                                                                                                                                                                 "    </method>"
-                                                                                                                                                                                                                                                "    <method name='GetScanType'>"
-                                                                                                                                                                                                                                                "      <arg type='s' name='type' direction='out'/>"
-                                                                                                                                                                                                                                                "    </method>"
                                                                                                                                                                                                                                                 "    <signal name='EnrollStatus'>"
-                                                                                                                                                                                                                                                "      <arg type='s' name='result'/>"
-                                                                                                                                                                                                                                                "      <arg type='b' name='done'/>"
-                                                                                                                                                                                                                                                "    </signal>"
-                                                                                                                                                                                                                                                "    <signal name='VerifyStatus'>"
                                                                                                                                                                                                                                                 "      <arg type='s' name='result'/>"
                                                                                                                                                                                                                                                 "      <arg type='b' name='done'/>"
                                                                                                                                                                                                                                                 "    </signal>"
@@ -586,8 +552,6 @@ static void handle_method_call(GDBusConnection *connection,
                                                                                                                                                                                                                                                 "      <arg type='o' name='device' direction='out'/>"
                                                                                                                                                                                                                                                 "    </method>"
                                                                                                                                                                                                                                                 "    <method name='GetDevices'>"
-                                                                                                                                                                                                                                                "      <arg type='s' name='username' direction='in'/>"
-                                                                                                                                                                                                                                                "      <arg type='s' name='application' direction='in'/>"
                                                                                                                                                                                                                                                 "      <arg type='ao' name='devices' direction='out'/>"
                                                                                                                                                                                                                                                 "    </method>"
                                                                                                                                                                                                                                                 "  </interface>"
@@ -629,7 +593,6 @@ static void handle_method_call(GDBusConnection *connection,
                                                                                                                                                                                                                                                                 default_user = get_default_user();
                                                                                                                                                                                                                                                                 g_print("Default user: %s\n", default_user);
 
-                                                                                                                                                                                                                                                                // Инициализируем устройство
                                                                                                                                                                                                                                                                 if (device_init() != 0) {
                                                                                                                                                                                                                                                                 g_printerr("Failed to initialize device\n");
                                                                                                                                                                                                                                                                 return 1;
@@ -651,7 +614,7 @@ static void handle_method_call(GDBusConnection *connection,
 
                                                                                                                                                                                                                                                                 g_bus_unown_name(id);
                                                                                                                                                                                                                                                                 g_main_loop_unref(loop);
-                                                                                                                                                                                                                                                                device_close();
+                                                                                                                                                                                                                                                                device_shutdown();
                                                                                                                                                                                                                                                                 g_free(default_user);
                                                                                                                                                                                                                                                                 g_free(claimed_user);
 

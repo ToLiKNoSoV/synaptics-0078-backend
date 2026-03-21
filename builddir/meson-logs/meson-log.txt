@@ -1,4 +1,4 @@
-Build started at 2026-03-14T01:23:31.348940
+Build started at 2026-03-21T05:56:39.967048
 Main binary: /usr/bin/python
 Build Options: 
 Python system: Linux
@@ -34,7 +34,7 @@ Copyright (C) 2026 Free Software Foundation, Inc.
 -----------
 stderr:
 collect2 версия 15.2.1 20260209
-/usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccbBural.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib --version -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
+/usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccnmtP8g.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib --version -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
 -----------
 Sanity testing C compiler: cc
 Is cross compiler: False.
@@ -85,7 +85,7 @@ Copyright (C) 2026 Free Software Foundation, Inc.
 -----------
 stderr:
 collect2 версия 15.2.1 20260209
-/usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccWSr8E1.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib --version -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
+/usr/bin/ld -plugin /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccGbdaSL.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/Scrt1.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtbeginS.o -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../.. -L/lib -L/usr/lib --version -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/crtn.o
 -----------
 Sanity testing C compiler: cc
 Is cross compiler: False.
@@ -151,7 +151,7 @@ stdout:
 -lglib-2.0
 -----------
 Running compile:
-Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmp_d_90y2o
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpmyepftva
 Code:
 
         #include<stddef.h>
@@ -161,7 +161,7 @@ Code:
             return 0;
         }
 -----------
-Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmp_d_90y2o/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmp_d_90y2o/output.exe -D_FILE_OFFSET_BITS=64 -O0` -> 0
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpmyepftva/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpmyepftva/output.exe -D_FILE_OFFSET_BITS=64 -O0` -> 0
 Program stdout:
 
 8
@@ -170,23 +170,23 @@ Program stderr:
 
 
 Running compile:
-Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmph7uq1hqu
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmplk2azqt4
 Code:
 
 -----------
-Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmph7uq1hqu/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmph7uq1hqu/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 --print-search-dirs` -> 0
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmplk2azqt4/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmplk2azqt4/output.obj -c -D_FILE_OFFSET_BITS=64 -O0 --print-search-dirs` -> 0
 stdout:
 install: /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/
 programs: =/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/bin/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/bin/
 libraries: =/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/lib/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../x86_64-pc-linux-gnu/15.2.1/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../lib/:/lib/x86_64-pc-linux-gnu/15.2.1/:/lib/../lib/:/usr/lib/x86_64-pc-linux-gnu/15.2.1/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../../x86_64-pc-linux-gnu/lib/:/usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/../../../:/lib/:/usr/lib/
 -----------
 Running compile:
-Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmp4dm6_s_r
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpy80jkhoz
 Code:
 int main(void) { return 0; }
 
 -----------
-Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmp4dm6_s_r/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmp4dm6_s_r/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libglib-2.0.so -Wl,--allow-shlib-undefined` -> 0
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpy80jkhoz/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpy80jkhoz/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libglib-2.0.so -Wl,--allow-shlib-undefined` -> 0
 Run-time dependency glib-2.0 found: YES 2.86.4
 Determining dependency 'gio-2.0' with pkg-config executable '/usr/bin/pkg-config'
 env[PKG_CONFIG_PATH]: 
@@ -219,19 +219,19 @@ stdout:
 -lgio-2.0 -lgobject-2.0 -lglib-2.0
 -----------
 Running compile:
-Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmp_qtjvv6_
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmp9e12b7aw
 Code:
 int main(void) { return 0; }
 
 -----------
-Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmp_qtjvv6_/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmp_qtjvv6_/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libgio-2.0.so -Wl,--allow-shlib-undefined` -> 0
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmp9e12b7aw/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmp9e12b7aw/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libgio-2.0.so -Wl,--allow-shlib-undefined` -> 0
 Running compile:
-Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpzoeqkbrb
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmp76dzuiqo
 Code:
 int main(void) { return 0; }
 
 -----------
-Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpzoeqkbrb/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpzoeqkbrb/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libgobject-2.0.so -Wl,--allow-shlib-undefined` -> 0
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmp76dzuiqo/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmp76dzuiqo/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libgobject-2.0.so -Wl,--allow-shlib-undefined` -> 0
 Run-time dependency gio-2.0 found: YES 2.86.4
 Determining dependency 'gio-unix-2.0' with pkg-config executable '/usr/bin/pkg-config'
 env[PKG_CONFIG_PATH]: 
@@ -295,12 +295,12 @@ stdout:
 -lfprint-2 -lgio-2.0 -lgobject-2.0 -lglib-2.0
 -----------
 Running compile:
-Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpqh4m38n5
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmp4sb_mpi9
 Code:
 int main(void) { return 0; }
 
 -----------
-Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpqh4m38n5/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpqh4m38n5/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libfprint-2.so -Wl,--allow-shlib-undefined` -> 0
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmp4sb_mpi9/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmp4sb_mpi9/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libfprint-2.so -Wl,--allow-shlib-undefined` -> 0
 Run-time dependency libfprint-2 found: YES 1.94.10
 Run-time dependency threads found: YES
 Determining dependency 'libsystemd' with pkg-config executable '/usr/bin/pkg-config'
@@ -331,12 +331,12 @@ stdout:
 -lsystemd
 -----------
 Running compile:
-Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpee6iki8v
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmp8fwob6pd
 Code:
 int main(void) { return 0; }
 
 -----------
-Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpee6iki8v/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpee6iki8v/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libsystemd.so -Wl,--allow-shlib-undefined` -> 0
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmp8fwob6pd/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmp8fwob6pd/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libsystemd.so -Wl,--allow-shlib-undefined` -> 0
 Run-time dependency libsystemd found: YES 259
 Determining dependency 'pam' with pkg-config executable '/usr/bin/pkg-config'
 env[PKG_CONFIG_PATH]: 
@@ -366,13 +366,21 @@ stdout:
 -lpam
 -----------
 Running compile:
-Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpodjooqu5
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpkw_nzmti
 Code:
 int main(void) { return 0; }
 
 -----------
-Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpodjooqu5/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpodjooqu5/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libpam.so -Wl,--allow-shlib-undefined` -> 0
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpkw_nzmti/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpkw_nzmti/output.exe -D_FILE_OFFSET_BITS=64 -O0 /usr/lib/libpam.so -Wl,--allow-shlib-undefined` -> 0
 Run-time dependency pam found: YES 1.7.2
+Running compile:
+Working directory:  /home/tolik/synaptics-0078-project/builddir/meson-private/tmpr07u_rjr
+Code:
+int main(void) { return 0; }
+
+-----------
+Command line: `cc /home/tolik/synaptics-0078-project/builddir/meson-private/tmpr07u_rjr/testfile.c -o /home/tolik/synaptics-0078-project/builddir/meson-private/tmpr07u_rjr/output.exe -D_FILE_OFFSET_BITS=64 -O0 -lm -Wl,--allow-shlib-undefined` -> 0
+Library m found: YES
 Build targets in project: 2
 
 Found ninja-1.13.2 at /usr/bin/ninja

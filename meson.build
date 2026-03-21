@@ -12,19 +12,19 @@ thread_dep = dependency('threads')
 systemd_dep = dependency('libsystemd')
 pam_dep = dependency('pam', required: true)
 
-# Основной бэкенд
+m_dep = meson.get_compiler('c').find_library('m', required: true)
+
 executable('synaptics-backend',
     [
         'src/main.c',
         'src/device.c',
         'src/storage.c'
     ],
-    dependencies: [glib_dep, gio_dep, gio_unix_dep, libfprint_dep, thread_dep],
+    dependencies: [glib_dep, gio_dep, gio_unix_dep, libfprint_dep, thread_dep, m_dep],
     install: true,
     install_dir: '/usr/lib/synaptics-0078-backend'
 )
 
-# PAM модуль (остаётся без изменений)
 shared_library('pam_synaptics',
     'src/pam_synaptics.c',
     dependencies: [systemd_dep, pam_dep],
@@ -33,10 +33,6 @@ shared_library('pam_synaptics',
     install_dir: '/usr/lib/security'
 )
 
-# Вспомогательные утилиты (больше не нужны, но оставим для совместимости)
-# capture.c и nbis-helper.c можно удалить из проекта
-
-# Конфигурационные файлы
 install_data('systemd/synaptics-backend.service',
     install_dir: '/etc/systemd/system'
 )
@@ -49,5 +45,4 @@ install_data('README.md',
     install_dir: '/usr/share/doc/synaptics-0078'
 )
 
-# Пост-установочный скрипт (обновлённый)
 meson.add_install_script('scripts/post-install.sh')
